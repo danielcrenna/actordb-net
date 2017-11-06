@@ -1,0 +1,2 @@
+- `lib\thrift.exe` is a `master` branch build of https://github.com/apache/thrift that supports `netcore` generator
+- `\lib\netstandard2.0\Thrift.dll` is the accompanying protocol client library that works with `netcore` generator, also built from `master`
