@@ -12,10 +12,6 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Internal\MySql\" />
-  </ItemGroup>
-
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="&quot;$(SolutionDir)lib\thrift.exe&quot; --gen netcore -out &quot;$(ProjectDir)\Internal\Thrift\Generated&quot; &quot;$(SolutionDir)lib\adbt.thrift&quot;" />
   </Target>
