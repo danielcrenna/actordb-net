@@ -28,7 +28,7 @@ public partial class Actordb
   {
     Task<string> protocolVersionAsync(CancellationToken cancellationToken);
 
-    Task<LoginResult> loginAsync(string username, string password, CancellationToken cancellationToken);
+    Task<LoginResult> loginAsync(string username, byte[] password, CancellationToken cancellationToken);
 
     Task<byte[]> saltAsync(CancellationToken cancellationToken);
 
@@ -95,7 +95,7 @@ public partial class Actordb
       throw new TApplicationException(TApplicationException.ExceptionType.MissingResult, "protocolVersion failed: unknown result");
     }
 
-    public async Task<LoginResult> loginAsync(string username, string password, CancellationToken cancellationToken)
+    public async Task<LoginResult> loginAsync(string username, byte[] password, CancellationToken cancellationToken)
     {
       await OutputProtocol.WriteMessageBeginAsync(new TMessage("login", TMessageType.Call, SeqId), cancellationToken);
       
@@ -1335,13 +1335,13 @@ public partial class Actordb
 
     public string Username { get; set; }
 
-    public string Password { get; set; }
+    public byte[] Password { get; set; }
 
     public loginArgs()
     {
     }
 
-    public loginArgs(string username, string password) : this()
+    public loginArgs(string username, byte[] password) : this()
     {
       this.Username = username;
       this.Password = password;
@@ -1380,7 +1380,7 @@ public partial class Actordb
             case 2:
               if (field.Type == TType.String)
               {
-                Password = await iprot.ReadStringAsync(cancellationToken);
+                Password = await iprot.ReadBinaryAsync(cancellationToken);
                 isset_password = true;
               }
               else
@@ -1430,7 +1430,7 @@ public partial class Actordb
         field.Type = TType.String;
         field.ID = 2;
         await oprot.WriteFieldBeginAsync(field, cancellationToken);
-        await oprot.WriteStringAsync(Password, cancellationToken);
+        await oprot.WriteBinaryAsync(Password, cancellationToken);
         await oprot.WriteFieldEndAsync(cancellationToken);
         await oprot.WriteFieldStopAsync(cancellationToken);
         await oprot.WriteStructEndAsync(cancellationToken);

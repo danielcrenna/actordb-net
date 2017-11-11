@@ -80,7 +80,7 @@ service Actordb {
 
   string protocolVersion(),
 
-  LoginResult login(1: required string username, 2: required string password) throws (1:InvalidRequestException ire), 
+  LoginResult login(1: required string username, 2: required binary password) throws (1:InvalidRequestException ire), 
 
   // For safer login, get 20 bytes of cryptographically random data, use it to hash password for login call.
   // It uses the same hashing algorithm as mysql:
