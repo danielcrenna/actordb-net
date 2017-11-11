@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
@@ -89,38 +90,74 @@ namespace ActorDb
 
 		#region Configuration
 
-		public async Task<Result> InitializeNodeAsync()
+		public async Task InitializeNodeAsync(string rootUser, string rootPassword, Configuration configuration)
 		{
 			try
 			{
-				var init = new StringBuilder()
-						//// Cluster
-						//.AppendLine("use config")
-						//.AppendLine("insert into groups values ('grp1','cluster')")
-						//.AppendLine("insert into nodes values (localnode(),'grp1')")
-						//// Root User
-						//.AppendLine("CREATE USER 'root' IDENTIFIED BY 'rootpass'")
-						//.AppendLine("commit")
-						// Query User
-						.AppendLine("CREATE USER 'myuser' IDENTIFIED BY 'mypass'")
-						.AppendLine("GRANT read,write ON * to 'myuser'")
-						.AppendLine("commit")
-					;
-
-				Result r;
-
-				r = await _thrift.exec_sqlAsync(init.ToString(), _cancel.Token);
-
-				//r = await _thrift.exec_sqlAsync("CREATE USER 'myuser' IDENTIFIED BY 'mypass'", _cancel.Token);
-				//r = await _thrift.exec_configAsync("GRANT read,write ON * to 'myuser'", _cancel.Token);
-				//r = await _thrift.exec_configAsync("commit", _cancel.Token);
-
-				return r;
+				var sql = new StringBuilder();
+				sql.Append($"CREATE USER '{rootUser}' IDENTIFIED BY '{rootPassword}';");
+				await _thrift.exec_configAsync(sql.ToString(), _cancel.Token);
 			}
-			catch (Exception ex)
+			catch (InvalidRequestException ire)
 			{
-				Console.WriteLine(ex);
-				throw;
+				_logger?.LogError(ire, $"Error initializing node");
+			}
+		}
+
+		public Task SetConfigurationAsync(Configuration config)
+		{
+			// See: https://github.com/biokoda/actordb/issues/9
+			throw new NotImplementedException();
+		}
+
+		public async Task<string> GetLocalNodeNameAsync()
+		{
+			var result = await _thrift.exec_configAsync("SELECT localnode() AS node FROM dual", _cancel.Token);
+
+			return result.RdRes?.Rows?[0]?["node"]?.Text;
+		}
+
+		public async Task<Configuration> GetConfigurationAsync()
+		{
+			try
+			{
+				var config = new Configuration();
+
+				var groups = await _thrift.exec_configAsync("SELECT * FROM groups", _cancel.Token);
+				if (groups.__isset.rdRes)
+				{
+					foreach (var row in groups.RdRes.Rows)
+					{
+						var group = new Group();
+						group.Name = row["name"].Text;
+						group.Type = (GroupType) Enum.Parse(typeof(GroupType), row["type"].Text, true);
+						config.Groups.Add(group);
+					}
+
+					var nodes = await _thrift.exec_configAsync("SELECT * FROM nodes", _cancel.Token);
+					if (nodes.__isset.rdRes)
+					{
+						foreach (var row in nodes.RdRes.Rows)
+						{
+							var node = new Node
+							{ 
+								Name = row["name"].Text,
+								Group = config.Groups.FirstOrDefault(x => x.Name == row["group_name"].Text)
+							};
+							config.Nodes.Add(node);
+						}
+
+						return config;
+					}
+				}
+
+				_logger?.LogError($"Unexpected result retrieving configuration");
+				return null;
+			}
+			catch (InvalidRequestException ire)
+			{
+				_logger?.LogError(ire, $"Error retrieving configuration");
+				return null;
 			}
 		}
 

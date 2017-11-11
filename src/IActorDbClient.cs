@@ -6,6 +6,10 @@ namespace ActorDb
 {
 	public interface IActorDbClient : IDisposable
 	{
+		Task<Configuration> GetConfigurationAsync();
+		Task SetConfigurationAsync(Configuration config);
+		Task<string> GetLocalNodeNameAsync();
+
 		Task<CreateUserResult> CreateUserAsync(string username, string password, params KeyValuePair<string, ActorPermissions>[] acl);
 		Task<DeleteUserResult> DeleteUserAsync(string username);
 

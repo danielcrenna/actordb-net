@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ActorDb;
+using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,6 +15,19 @@ namespace actordb_net.UnitTests
 	    public ConnectionTests(ITestOutputHelper output)
 	    {
 		    _output = output;
+	    }
+
+	    [Fact]
+	    public async Task Can_get_configuration()
+	    {
+		    using (IActorDbClient client = await ActorDbClient.BeginSession("root", "rootpass"))
+		    {
+			    var config = await client.GetConfigurationAsync();
+
+				Assert.NotNull(config);
+
+				_output.WriteLine(JsonConvert.SerializeObject(config));
+		    }
 	    }
 
 		[Fact]
