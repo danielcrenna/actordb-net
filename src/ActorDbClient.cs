@@ -70,7 +70,7 @@ namespace ActorDb
 		private readonly CancellationTokenSource _cancel;
 		private readonly Actordb.Client _thrift;
 
-		public ActorDbClient(ILogger<ActorDbClient> logger = null, string host = "localhost", int port = 33306)
+		public ActorDbClient(string host = "localhost", int port = 33306, ILogger<ActorDbClient> logger = null)
 		{
 			_logger = logger;
 			var tcp = new TcpClient(host, port);
@@ -83,7 +83,7 @@ namespace ActorDb
 
 		public static async Task<IActorDbClient> BeginSession(string username, string password, ILogger<ActorDbClient> logger = null, string host = "localhost", int port = 33306)
 		{
-			var client = new ActorDbClient(logger, host, port);
+			var client = new ActorDbClient(host, port, logger);
 			await client.LoginSecureAsync(username, password);
 			return client;
 		}
