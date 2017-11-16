@@ -1,0 +1,34 @@
+## Name of the node
+-name node1@127.0.0.1
+
+## Cookie for distributed erlang
+-setcookie actordb
+
+## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
+## (Disabled by default..use with caution!)
+##-heart
+
+-smp enable
+
+## Enable kernel poll.
++K true
+
+## This assumes a single disk. 3 per disk is enough.
++A 3
+
+## Max number of erlang processes.
++P 256000
+
+## Bind schedulers to cores: http://www.erlang.org/doc/man/erl.html#+sbt
++stbt db
+
++C multi_time_warp
+
+## Max number of concurrent ports/sockets.
+-env ERL_MAX_PORTS 65536
+
+-env ERL_FULLSWEEP_AFTER 10
+
+## Every client connection uses an ETS table. If you have lots of connections to the database you may
+## want to increase this value.
+-env ERL_MAX_ETS_TABLES 8192
