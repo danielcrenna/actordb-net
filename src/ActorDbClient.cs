@@ -228,7 +228,6 @@ namespace ActorDb
 
 		#endregion
 		
-
 		#region Login
 
 		public async Task<bool> LoginAsync(string username, string password)
@@ -262,17 +261,13 @@ namespace ActorDb
 
 		#endregion
 
-
-
 		#region Queries
 
 		
 
 
 		#endregion
-
-
-		
+				
 		#region Actors
 
 		public async Task<IReadOnlyCollection<string>> GetActorTypesAsync()
@@ -293,7 +288,6 @@ namespace ActorDb
 		}
 
 		#endregion
-
 
 		public async Task<string> GetProtocolVersionAsync()
 		{
